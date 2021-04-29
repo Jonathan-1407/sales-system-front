@@ -68,7 +68,7 @@
         <v-toolbar-title>Sales System</v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <v-btn icon>
+        <v-btn icon @click="logout()">
           <v-icon>mdi-export</v-icon>
         </v-btn>
       </v-app-bar>
@@ -92,6 +92,8 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+
 export default {
   name: "App",
 
@@ -148,6 +150,12 @@ export default {
         ]
       }
     ]
-  })
+  }),
+  methods: {
+    ...mapActions(["autoLogin", "logout"])
+  },
+  created: function() {
+    this.autoLogin();
+  }
 };
 </script>
