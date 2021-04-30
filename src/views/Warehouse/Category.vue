@@ -1,5 +1,19 @@
 <template>
   <div>
+    <v-snackbar v-model="snackbar.show" :multi-line="true" :timeout="2000">
+      {{ snackbar.text }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          :color="snackbar.color"
+          text
+          v-bind="attrs"
+          @click="snackbar.show = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
     <v-data-table
       :headers="headers"
       :items="categories"
@@ -156,6 +170,11 @@ export default {
     search: "",
     dialog: false,
     dialogDisable: false,
+    snackbar: {
+      show: false,
+      text: "",
+      color: ""
+    },
     headers: [
       {
         text: "Actions",
@@ -187,10 +206,12 @@ export default {
     categories: [],
     editedIndex: -1,
     editedItem: {
-      name: ""
+      name: "",
+      state: 1
     },
     defaultItem: {
-      name: ""
+      name: "",
+      state: 1
     }
   }),
 
@@ -226,7 +247,6 @@ export default {
         .get("/category/list", config)
         .then(res => {
           this.categories = res.data;
-          console.log(res);
         })
         .catch(err => {
           console.log(err);
@@ -267,10 +287,43 @@ export default {
     },
 
     save: function() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.categories[this.editedIndex], this.editedItem);
+      let self = this;
+      let config = {
+        headers: {
+          Token: this.token
+        }
+      };
+
+      if (self.editedIndex > -1) {
+        self.editedItem.state = 1;
+
+        axios
+          .put("/category/update", self.editedItem, config)
+          .then(() => {
+            self.snackbar.show = true;
+            self.snackbar.text = "Updated Category";
+            self.snackbar.color = "yellow darken-3";
+            self.list();
+          })
+          .catch(() => {
+            self.snackbar.show = true;
+            self.snackbar.text = "Server Error";
+            self.snackbar.color = "error lighten-3";
+          });
       } else {
-        this.categories.push(this.editedItem);
+        axios
+          .post("/category/add", self.editedItem, config)
+          .then(() => {
+            self.snackbar.show = true;
+            self.snackbar.text = "Saved Category";
+            self.snackbar.color = "indigo lighten-3";
+            self.list();
+          })
+          .catch(() => {
+            self.snackbar.show = true;
+            self.snackbar.text = "Server Error";
+            self.snackbar.color = "error lighten-3";
+          });
       }
       this.close();
     }
