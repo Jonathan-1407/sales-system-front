@@ -1,5 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import store from "../store";
 
 Vue.use(VueRouter);
 
@@ -7,12 +8,20 @@ const routes = [
   {
     path: "/",
     name: "Login",
-    component: () => import("../views/Auth/Login.vue")
+    component: () => import("../views/Auth/Login.vue"),
+    meta: {
+      visitor: true
+    }
   },
   {
     path: "/home",
     name: "Home",
-    component: () => import("../views/Home.vue")
+    component: () => import("../views/Home.vue"),
+    meta: {
+      administrator: true,
+      grocer: true,
+      seller: true
+    }
   }
 ];
 
@@ -20,6 +29,26 @@ const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.visitor)) {
+    next();
+  } else if (store.state.user && store.state.user.role == "Administrator") {
+    if (to.matched.some(record => record.meta.administrator)) {
+      next();
+    }
+  } else if (store.state.user && store.state.user.role == "Grocer") {
+    if (to.matched.some(record => record.meta.grocer)) {
+      next();
+    }
+  } else if (store.state.user && store.state.user.role == "Seller") {
+    if (to.matched.some(record => record.meta.seller)) {
+      next();
+    }
+  } else {
+    next({ name: "Login" });
+  }
 });
 
 export default router;

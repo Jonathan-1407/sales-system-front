@@ -3,17 +3,12 @@
     <v-container>
       <v-layout>
         <v-flex sm12 md12 lg12 xl12>
-          <v-card
-            max-width="450"
-            class="mx-auto mt-5 justify-center"
-            elevation="8"
-          >
+          <v-card max-width="450" class="mx-auto justify-center" elevation="8">
             <v-form @submit.prevent="login()">
               <v-app-bar color="indigo" class="white--text">
                 <v-spacer></v-spacer>
                 <h3>
                   Sales Sytem
-                  {{ $store.state.user }}
                 </h3>
                 <v-spacer></v-spacer>
               </v-app-bar>
@@ -24,7 +19,7 @@
                   type="text"
                   label="Email"
                   prepend-icon="mdi-email"
-                  :rules="[rules.required, rules.counter, email]"
+                  :rules="[rules.required, rules.counter, rules.email]"
                   v-model="email"
                   counter
                   maxlength="30"
@@ -56,7 +51,6 @@
                 >
                   Login
                 </v-btn>
-                {{ isLoggedIn }}
               </v-card-actions>
             </v-form>
           </v-card>
@@ -86,30 +80,26 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions } from "vuex";
 import axios from "axios";
 
 export default {
   name: "Login",
   data: () => ({
     show_password: false,
-    email: "jon@email.com",
-    password: "hola1234",
+    email: "",
+    password: "",
     rules: {
       required: value => !!value || "Required field",
       counter: value => value.length <= 30 || "Maximum 30 characters",
       email: value =>
-        !!value ||
         /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
-        "E-mail must be valid"
+        "Email must be valid"
     },
     alert: false,
     loading: false,
     error: ""
   }),
-  computed: {
-    ...mapGetters(["isLoggedIn"])
-  },
   methods: {
     ...mapActions(["saveToken"]),
     login: function() {
@@ -127,6 +117,7 @@ export default {
         .then(data => {
           self.loading = false;
           self.saveToken(data._token);
+          self.$router.push({ name: "Home" });
         })
         .catch(error => {
           self.error = "These credentials do not match our records";
