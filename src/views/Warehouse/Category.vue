@@ -51,6 +51,9 @@
                       <v-text-field
                         v-model="editedItem.name"
                         label="Name"
+                        :rules="[rules.required, rules.counter]"
+                        counter
+                        maxlength="30"
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -69,7 +72,7 @@
                 <v-btn color="red darken-1" text @click="close">
                   Cancel
                 </v-btn>
-                <v-btn color="indigo darken-1" text @click="save">
+                <v-btn color="indigo darken-1" text @click="save" :disabled="isInvalid">
                   Save
                 </v-btn>
               </v-card-actions>
@@ -175,6 +178,10 @@ export default {
       text: "",
       color: ""
     },
+    rules: {
+      required: value => !!value || "Required field",
+      counter: value => value.length <= 30 || "Maximum 30 characters"
+    },
     headers: [
       {
         text: "Actions",
@@ -219,6 +226,9 @@ export default {
     ...mapState(["token"]),
     formTitle: function() {
       return this.editedIndex === -1 ? "New Category" : "Edit Category";
+    },
+    isInvalid: function() {
+      return this.editedItem.name.length > 0 ?  false :  true;
     }
   },
 
