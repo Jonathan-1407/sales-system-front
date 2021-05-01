@@ -1,8 +1,16 @@
 <template>
   <div>
-    <v-snackbar v-model="snackbar.show" :multi-line="true" :timeout="2000">
+    <v-snackbar
+      v-model="snackbar.show"
+      :timeout="2000"
+      transition="scroll-x-reverse-transition"
+      absolute
+      :color="snackbar.color"
+      top
+      right
+      text
+    >
       {{ snackbar.text }}
-
       <template v-slot:action="{ attrs }">
         <v-btn
           :color="snackbar.color"
@@ -10,7 +18,7 @@
           v-bind="attrs"
           @click="snackbar.show = false"
         >
-          Close
+          <v-icon>mdi-close-circle</v-icon>
         </v-btn>
       </template>
     </v-snackbar>
@@ -72,24 +80,29 @@
                 <v-btn color="red darken-1" text @click="close">
                   Cancel
                 </v-btn>
-                <v-btn color="indigo darken-1" text @click="save" :disabled="isInvalid">
+                <v-btn
+                  color="indigo darken-1"
+                  text
+                  @click="save"
+                  :disabled="isInvalid"
+                >
                   Save
                 </v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
-          <v-dialog v-model="dialogDisable" max-width="500px">
+          <v-dialog v-model="dialogState" max-width="500px">
             <v-card>
               <v-card-title class="headline flex justify-center">
-                Disable this category?
+                {{ dialogStateTitle }} this category?
               </v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="red darken-1" text @click="closeDisable">
+                <v-btn color="red darken-1" text @click="closeChangeState">
                   Cancel
                 </v-btn>
-                <v-btn color="indigo darken-1" text @click="disableConfirm">
-                  Disable
+                <v-btn color="indigo darken-1" text @click="changeStateConfirm">
+                  {{ dialogStateTitle }}
                 </v-btn>
                 <v-spacer></v-spacer>
               </v-card-actions>
@@ -113,7 +126,6 @@
             <v-icon
               small
               class="mr-2"
-              color="yellow darken-4"
               @click="edit(item)"
               v-bind="attrs"
               v-on="on"
@@ -126,14 +138,8 @@
 
         <v-tooltip bottom v-if="item.state">
           <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              small
-              color="red"
-              @click="disable(item)"
-              v-bind="attrs"
-              v-on="on"
-            >
-              mdi-delete
+            <v-icon small @click="changeState(item)" v-bind="attrs" v-on="on">
+              mdi-cancel
             </v-icon>
           </template>
           <span>Disable</span>
@@ -141,13 +147,7 @@
 
         <v-tooltip bottom v-else>
           <template v-slot:activator="{ on, attrs }">
-            <v-icon
-              small
-              color="indigo"
-              @click="enable(item)"
-              v-bind="attrs"
-              v-on="on"
-            >
+            <v-icon small @click="changeState(item)" v-bind="attrs" v-on="on">
               mdi-check
             </v-icon>
           </template>
@@ -172,7 +172,7 @@ export default {
   data: () => ({
     search: "",
     dialog: false,
-    dialogDisable: false,
+    dialogState: false,
     snackbar: {
       show: false,
       text: "",
@@ -227,8 +227,11 @@ export default {
     formTitle: function() {
       return this.editedIndex === -1 ? "New Category" : "Edit Category";
     },
+    dialogStateTitle: function() {
+      return this.editedItem.state ? "Disable" : "Enable";
+    },
     isInvalid: function() {
-      return this.editedItem.name.length > 0 ?  false :  true;
+      return this.editedItem.name.length > 0 ? false : true;
     }
   },
 
@@ -236,8 +239,8 @@ export default {
     dialog: function(val) {
       val || this.close();
     },
-    dialogDisable: function(val) {
-      val || this.closeDisable();
+    dialogState: function(val) {
+      val || this.closeChangeState();
     }
   },
 
@@ -246,6 +249,12 @@ export default {
   },
 
   methods: {
+    showSnackbar: function({ show, text, color }) {
+      let self = this;
+      self.snackbar.show = show;
+      self.snackbar.text = text;
+      self.snackbar.color = color;
+    },
     list: function() {
       let config = {
         headers: {
@@ -258,8 +267,12 @@ export default {
         .then(res => {
           this.categories = res.data;
         })
-        .catch(err => {
-          console.log(err);
+        .catch(() => {
+          self.showSnackbar({
+            show: true,
+            text: "Server Error",
+            color: "red darken-3"
+          });
         });
     },
 
@@ -269,15 +282,59 @@ export default {
       this.dialog = true;
     },
 
-    disable: function(item) {
+    /** Change state to Enable or Disable **/
+    changeState: function(item) {
       this.editedIndex = this.categories.indexOf(item);
       this.editedItem = Object.assign({}, item);
-      this.dialogDisable = true;
+      this.dialogState = true;
     },
 
-    disableConfirm: function() {
-      this.categories.splice(this.editedIndex, 1);
-      this.closeDisable();
+    changeStateConfirm: function() {
+      let self = this;
+      let config = {
+        headers: {
+          Token: this.token
+        }
+      };
+
+      if (self.editedItem.state) {
+        axios
+          .put("/category/disable", self.editedItem, config)
+          .then(() => {
+            self.showSnackbar({
+              show: true,
+              text: "Disabled Category",
+              color: "red darken-3"
+            });
+            self.list();
+          })
+          .catch(() => {
+            self.showSnackbar({
+              show: true,
+              text: "Server Error",
+              color: "red lighten-3"
+            });
+          });
+      } else {
+        axios
+          .put("/category/enable", self.editedItem, config)
+          .then(() => {
+            self.showSnackbar({
+              show: true,
+              text: "Enable Category",
+              color: "indigo darken-3"
+            });
+            self.list();
+          })
+          .catch(() => {
+            self.showSnackbar({
+              show: true,
+              text: "Server Error",
+              color: "red darken-3"
+            });
+          });
+      }
+      this.closeChangeState();
     },
 
     close: function() {
@@ -288,8 +345,8 @@ export default {
       });
     },
 
-    closeDisable: function() {
-      this.dialogDisable = false;
+    closeChangeState: function() {
+      this.dialogState = false;
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
@@ -310,29 +367,37 @@ export default {
         axios
           .put("/category/update", self.editedItem, config)
           .then(() => {
-            self.snackbar.show = true;
-            self.snackbar.text = "Updated Category";
-            self.snackbar.color = "yellow darken-3";
+            self.showSnackbar({
+              show: true,
+              text: "Updated Category",
+              color: "orange darken-3"
+            });
             self.list();
           })
           .catch(() => {
-            self.snackbar.show = true;
-            self.snackbar.text = "Server Error";
-            self.snackbar.color = "error lighten-3";
+            self.showSnackbar({
+              show: true,
+              text: "Server Error",
+              color: "red darken-3"
+            });
           });
       } else {
         axios
           .post("/category/add", self.editedItem, config)
           .then(() => {
-            self.snackbar.show = true;
-            self.snackbar.text = "Saved Category";
-            self.snackbar.color = "indigo lighten-3";
+            self.showSnackbar({
+              show: true,
+              text: "Saved Category",
+              color: "indigo darken-3"
+            });
             self.list();
           })
           .catch(() => {
-            self.snackbar.show = true;
-            self.snackbar.text = "Server Error";
-            self.snackbar.color = "error lighten-3";
+            self.showSnackbar({
+              show: true,
+              text: "Server Error",
+              color: "red darken-3"
+            });
           });
       }
       this.close();

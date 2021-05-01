@@ -29,8 +29,7 @@ const routes = [
     component: () => import("../views/Warehouse/Category.vue"),
     meta: {
       administrator: true,
-      grocer: true,
-      seller: true
+      grocer: true
     }
   }
 ];
@@ -57,7 +56,7 @@ router.beforeEach((to, from, next) => {
       next();
     }
   } else {
-    next({name: "Login"});
+    next({ name: "Login" });
   }
 });
 
