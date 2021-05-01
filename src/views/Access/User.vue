@@ -24,7 +24,7 @@
     </v-snackbar>
     <v-data-table
       :headers="headers"
-      :items="categories"
+      :items="users"
       sort-by="calories"
       class="elevation-5"
       :search="search"
@@ -60,8 +60,10 @@
                         v-model="editedItem.role"
                         :items="roles"
                         label="Role"
+                        :rules="[rules.required, rules.counter]"
                       ></v-select>
                     </v-col>
+
                     <v-col cols="12" sm="12" md="8">
                       <v-text-field
                         v-model="editedItem.name"
@@ -71,10 +73,14 @@
                         maxlength="30"
                       ></v-text-field>
                     </v-col>
+
                     <v-col cols="12" sm="12" md="12">
                       <v-text-field
                         v-model="editedItem.address"
                         label="Address"
+                        :rules="[rules.required, rules.counter]"
+                        counter
+                        maxlength="100"
                       ></v-text-field>
                     </v-col>
 
@@ -82,6 +88,9 @@
                       <v-text-field
                         v-model="editedItem.phone"
                         label="Phone"
+                        :rules="[rules.required, rules.counter]"
+                        counter
+                        maxlength="8"
                       ></v-text-field>
                     </v-col>
 
@@ -89,6 +98,9 @@
                       <v-text-field
                         v-model="editedItem.email"
                         label="Email"
+                        :rules="[rules.required, rules.counter, rules.email]"
+                        counter
+                        maxlength="30"
                       ></v-text-field>
                     </v-col>
 
@@ -96,6 +108,9 @@
                       <v-text-field
                         v-model="editedItem._password"
                         label="Password"
+                        :rules="[rules.counter]"
+                        counter
+                        maxlength="20"
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -194,7 +209,7 @@ import { mapState } from "vuex";
 import axios from "axios";
 
 export default {
-  name: "Category",
+  name: "User",
   data: () => ({
     search: "",
     dialog: false,
@@ -207,7 +222,10 @@ export default {
     roles: ["Seller", "Grocer", "Administrator"],
     rules: {
       required: value => !!value || "Required field",
-      counter: value => value.length <= 30 || "Maximum 30 characters"
+      counter: value => value.length <= 60 || "Maximum 60 characters",
+      email: value =>
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
+        "Email must be valid"
     },
     headers: [
       {
@@ -229,7 +247,6 @@ export default {
         sortable: true,
         value: "role"
       },
-
       {
         text: "Address",
         align: "left",
@@ -256,14 +273,22 @@ export default {
         width: "15%"
       }
     ],
-    categories: [],
+    users: [],
     editedIndex: -1,
     editedItem: {
+      role: "",
       name: "",
+      address: "",
+      phone: "",
+      email: "",
       state: 1
     },
     defaultItem: {
+      role: "",
       name: "",
+      address: "",
+      phone: "",
+      email: "",
       state: 1
     }
   }),
@@ -277,7 +302,18 @@ export default {
       return this.editedItem.state ? "Disable" : "Enable";
     },
     isInvalid: function() {
-      return this.editedItem.name.length > 0 ? false : true;
+      let self = this;
+      if (
+        self.editedItem.role.length > 0 &&
+        self.editedItem.name.length > 0 &&
+        (self.editedItem.address.length > 0) &
+          (self.editedItem.phone.length > 0) &&
+        self.editedItem.email.length > 0
+      ) {
+        return false;
+      } else {
+        return true;
+      }
     }
   },
 
@@ -301,6 +337,7 @@ export default {
       self.snackbar.text = text;
       self.snackbar.color = color;
     },
+
     list: function() {
       let config = {
         headers: {
@@ -311,7 +348,7 @@ export default {
       axios
         .get("/user/list", config)
         .then(res => {
-          this.categories = res.data;
+          this.users = res.data;
         })
         .catch(() => {
           self.showSnackbar({
@@ -323,14 +360,14 @@ export default {
     },
 
     edit: function(item) {
-      this.editedIndex = this.categories.indexOf(item);
+      this.editedIndex = this.users.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     /** Change state to Enable or Disable **/
     changeState: function(item) {
-      this.editedIndex = this.categories.indexOf(item);
+      this.editedIndex = this.users.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogState = true;
     },
@@ -409,7 +446,7 @@ export default {
 
       if (self.editedIndex > -1) {
         self.editedItem.state = 1;
-        if(self.editedItem._password) {
+        if (self.editedItem._password) {
           self.editedItem.password = self.editedItem._password;
         }
 
