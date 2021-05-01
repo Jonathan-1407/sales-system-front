@@ -31,6 +31,14 @@ const routes = [
       administrator: true,
       grocer: true
     }
+  },
+  {
+    path: "/users",
+    name: "User",
+    component: () => import("../views/Access/User.vue"),
+    meta: {
+      administrator: true,
+    }
   }
 ];
 
@@ -56,7 +64,7 @@ router.beforeEach((to, from, next) => {
       next();
     }
   } else {
-    next({ name: "Login" });
+    next({name: "Login"});
   }
 });
 
