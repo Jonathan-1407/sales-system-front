@@ -71,24 +71,34 @@
                         label="category"
                         item-text="name"
                         item-value="_id"
+                        :rules="[rules.required]"
                       ></v-select>
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
                       <v-text-field
                         v-model="editedItem.name"
                         label="Name"
+                        :rules="[rules.required]"
+                        counter
+                        maxlength="60"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="6">
                       <v-text-field
-                        v-model="editedItem.stock"
+                        v-model.number="editedItem.stock"
                         label="Stock"
+                        :rules="[rules.required, rules.number]"
+                        counter
+                        maxlength="999"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="6">
                       <v-text-field
-                        v-model="editedItem.sale_price"
+                        v-model.number="editedItem.sale_price"
                         label="Sale Price"
+                        :rules="[rules.required, rules.number]"
+                        counter
+                        maxlength="999"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
@@ -205,7 +215,8 @@ export default {
     },
     rules: {
       required: value => !!value || "Required field",
-      counter: value => value.length <= 30 || "Maximum 30 characters"
+      counter: value => value.length <= 30 || "Maximum 30 characters",
+      number: value => /^-?\d*\.?\d*$/.test(value) || "Only numbers"
     },
     headers: [
       {
@@ -263,11 +274,19 @@ export default {
     categories: [],
     editedIndex: -1,
     editedItem: {
+      code: "",
       name: "",
+      category: "",
+      stock: 0,
+      sale_price: 0,
       state: 1
     },
     defaultItem: {
+      code: "",
       name: "",
+      category: "",
+      stock: 0,
+      sale_price: 0,
       state: 1
     }
   }),
@@ -281,7 +300,19 @@ export default {
       return this.editedItem.state ? "Disable" : "Enable";
     },
     isInvalid: function() {
-      return this.editedItem.name.length > 0 ? false : true;
+      let self = this;
+
+      if (
+        self.editedItem.code.length > 0 &&
+        self.editedItem.name.length > 0 &&
+        self.editedItem.category.length > 0 &&
+        self.editedItem.stock >= 0 &&
+        self.editedItem.sale_price >= 0
+      ) {
+        return false;
+      } else {
+        return true;
+      }
     }
   },
 
@@ -339,7 +370,6 @@ export default {
         .get("/category/list", config)
         .then(res => {
           this.categories = res.data;
-          console.log(res.data);
         })
         .catch(() => {
           self.showSnackbar({
