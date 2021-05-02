@@ -33,11 +33,20 @@ const routes = [
     }
   },
   {
+    path: "/articles",
+    name: "Article",
+    component: () => import("../views/Warehouse/Article.vue"),
+    meta: {
+      administrator: true,
+      grocer: true
+    }
+  },
+  {
     path: "/users",
     name: "User",
     component: () => import("../views/Access/User.vue"),
     meta: {
-      administrator: true,
+      administrator: true
     }
   }
 ];
