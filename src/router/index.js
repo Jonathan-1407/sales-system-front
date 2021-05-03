@@ -42,6 +42,15 @@ const routes = [
     }
   },
   {
+    path: "/clients",
+    name: "Client",
+    component: () => import("../views/Sales/Client.vue"),
+    meta: {
+      administrator: true,
+      seller: true
+    }
+  },
+  {
     path: "/users",
     name: "User",
     component: () => import("../views/Access/User.vue"),
