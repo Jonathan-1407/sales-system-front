@@ -24,7 +24,7 @@
     </v-snackbar>
     <v-data-table
       :headers="headers"
-      :items="categories"
+      :items="clients"
       sort-by="calories"
       class="elevation-5"
       :search="search"
@@ -61,16 +61,16 @@
                         label="Document Type"
                         :rules="[rules.required, rules.counter]"
                         counter
-                        maxlength="30"
+                        maxlength="20"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="8" md="8">
                       <v-text-field
                         v-model="editedItem.document_number"
                         label="Document No."
-                        :rules="[rules.required, rules.counter]"
+                        :rules="[rules.required, rules.counter, rules.number]"
                         counter
-                        maxlength="30"
+                        maxlength="10"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
@@ -79,16 +79,16 @@
                         label="Name"
                         :rules="[rules.required, rules.counter]"
                         counter
-                        maxlength="30"
+                        maxlength="60"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="6">
                       <v-text-field
                         v-model="editedItem.email"
                         label="Email"
-                        :rules="[rules.required, rules.counter]"
+                        :rules="[rules.required, rules.counter, rules.email]"
                         counter
-                        maxlength="30"
+                        maxlength="20"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="6">
@@ -97,13 +97,16 @@
                         label="Phone"
                         :rules="[rules.required, rules.counter]"
                         counter
-                        maxlength="30"
+                        maxlength="8"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="12" md="12">
                       <v-text-field
                         v-model="editedItem.address"
                         label="Address"
+                        :rules="[rules.required, rules.counter]"
+                        counter
+                        maxlength="100"
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -214,7 +217,11 @@ export default {
     },
     rules: {
       required: value => !!value || "Required field",
-      counter: value => value.length <= 30 || "Maximum 30 characters"
+      counter: value => value.length <= 100 || "Maximum 100 characters",
+      email: value =>
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
+        "Email must be valid",
+      number: value => /^-?\d*\.?\d*$/.test(value) || "Only numbers"
     },
     headers: [
       {
@@ -268,16 +275,15 @@ export default {
         width: "15%"
       }
     ],
-    categories: [],
+    clients: [],
     editedIndex: -1,
     editedItem: {
       name: "",
-      document_type: "Client",
+      person_type: "Client",
       state: 1
     },
     defaultItem: {
       name: "",
-      document_type: "DUI",
       person_type: "Client",
       state: 1
     }
@@ -292,7 +298,19 @@ export default {
       return this.editedItem.state ? "Disable" : "Enable";
     },
     isInvalid: function() {
-      return this.editedItem.name.length > 0 ? false : true;
+      let self = this;
+      if (
+        self.editedItem.name.length > 0 &&
+        self.editedItem.document_type.length > 0 &&
+        self.editedItem.document_number.length > 0 &&
+        self.editedItem.email.length > 0 &&
+        self.editedItem.phone.length > 0 &&
+        self.editedItem.address.length > 0
+      )
+        return false;
+      else {
+        return true;
+      }
     }
   },
 
@@ -326,8 +344,7 @@ export default {
       axios
         .get("/person/list?type=Client", config)
         .then(res => {
-          this.categories = res.data;
-          console.log(res.data);
+          this.clients = res.data;
         })
         .catch(() => {
           this.showSnackbar({
@@ -339,14 +356,14 @@ export default {
     },
 
     edit: function(item) {
-      this.editedIndex = this.categories.indexOf(item);
+      this.editedIndex = this.clients.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     /** Change state to Enable or Disable **/
     changeState: function(item) {
-      this.editedIndex = this.categories.indexOf(item);
+      this.editedIndex = this.clients.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogState = true;
     },
