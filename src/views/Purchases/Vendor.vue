@@ -31,7 +31,7 @@
     >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>Clients</v-toolbar-title>
+          <v-toolbar-title>Vendors</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-text-field
@@ -131,7 +131,7 @@
           <v-dialog v-model="dialogState" max-width="500px">
             <v-card>
               <v-card-title class="headline flex justify-center">
-                {{ dialogStateTitle }} this client?
+                {{ dialogStateTitle }} this vendor?
               </v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -200,7 +200,7 @@ import { mapState } from "vuex";
 import axios from "axios";
 
 export default {
-  name: "Client",
+  name: "Vendor",
   data: () => ({
     search: "",
     dialog: false,
@@ -274,12 +274,12 @@ export default {
     editedIndex: -1,
     editedItem: {
       name: "",
-      person_type: "Client",
+      person_type: "Vendor",
       state: 1
     },
     defaultItem: {
       name: "",
-      person_type: "Client",
+      person_type: "Vendor",
       state: 1
     }
   }),
@@ -287,7 +287,7 @@ export default {
   computed: {
     ...mapState(["token"]),
     formTitle: function() {
-      return this.editedIndex === -1 ? "New Client" : "Edit Client";
+      return this.editedIndex === -1 ? "New Vendor" : "Edit Vendor";
     },
     dialogStateTitle: function() {
       return this.editedItem.state ? "Disable" : "Enable";
@@ -337,7 +337,7 @@ export default {
       };
 
       axios
-        .get("/person/list?type=Client", config)
+        .get("/person/list?type=Vendor", config)
         .then(res => {
           this.clients = res.data;
         })
@@ -377,7 +377,7 @@ export default {
           .then(() => {
             self.showSnackbar({
               show: true,
-              text: "Disabled Client",
+              text: "Disabled Vendor",
               color: "red darken-3"
             });
             self.list();
@@ -395,7 +395,7 @@ export default {
           .then(() => {
             self.showSnackbar({
               show: true,
-              text: "Enable Client",
+              text: "Enable Vendor",
               color: "indigo darken-3"
             });
             self.list();
@@ -443,7 +443,7 @@ export default {
           .then(() => {
             self.showSnackbar({
               show: true,
-              text: "Updated Client",
+              text: "Updated Vendor",
               color: "orange darken-3"
             });
             self.list();
@@ -461,7 +461,7 @@ export default {
           .then(() => {
             self.showSnackbar({
               show: true,
-              text: "Saved Client",
+              text: "Saved Vendor",
               color: "indigo darken-3"
             });
             self.list();
