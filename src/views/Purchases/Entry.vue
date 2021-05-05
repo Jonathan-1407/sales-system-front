@@ -109,18 +109,17 @@
                         label="Voucher type"
                         :items="['TICKET', 'INVOICE', 'GUIDE']"
                         :rules="[rules.required]"
-                        counter
-                        maxlength="30"
                         :readonly="dialogView"
                       ></v-select>
                     </v-col>
                     <v-col cols="12" sm="4" md="4">
                       <v-text-field
                         v-model="editedItem.voucher_series"
+                        :rules="[rules.required, rules.counter]"
+                        :readonly="dialogView"
                         label="Voucher series"
                         counter
-                        maxlength="30"
-                        :readonly="dialogView"
+                        maxlength="999"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="4" md="4">
@@ -128,7 +127,8 @@
                         v-model="editedItem.voucher_number"
                         label="Voucher No."
                         counter
-                        maxlength="30"
+                        maxlength="999"
+                        :rules="[rules.required, rules.counter]"
                         :readonly="dialogView"
                       ></v-text-field>
                     </v-col>
@@ -140,6 +140,7 @@
                         item-value="_id"
                         label="Vendor"
                         placeholder="Start typing to Search"
+                        :rules="[rules.required]"
                         :readonly="dialogView"
                       ></v-autocomplete>
                     </v-col>
@@ -148,7 +149,8 @@
                         v-model.number="editedItem.tax"
                         label="Tax"
                         counter
-                        maxlength="20"
+                        maxlength="5"
+                        :rules="[rules.required_number]"
                         :readonly="dialogView"
                       ></v-text-field>
                     </v-col>
@@ -375,7 +377,8 @@ export default {
     },
     rules: {
       required: value => !!value || "Required field",
-      counter: value => value.length <= 30 || "Maximum 30 characters"
+      required_number: value => parseFloat(value) >= 0 || "Required field",
+      counter: value => value.length <= 999 || "Maximum 999 characters"
     },
     headers: [
       {
@@ -516,18 +519,20 @@ export default {
     entries: [],
     editedIndex: -1,
     editedItem: {
-      name: "",
       voucher_number: "",
       voucher_type: "",
+      voucher_series: "",
+      person: "",
       details: [],
       tax: 0,
       total: 0,
       state: 1
     },
     defaultItem: {
-      name: "",
       voucher_number: "",
       voucher_type: "",
+      voucher_series: "",
+      person: "",
       details: [],
       tax: 0,
       total: 0,
@@ -547,7 +552,20 @@ export default {
       return this.editedIndex === -1 ? false : true;
     },
     isInvalid: function() {
-      return this.editedItem.voucher_type.length > 0 ? false : true;
+      let self = this;
+
+      if (
+        self.editedItem.voucher_type.length > 0 &&
+        self.editedItem.voucher_series.length > 0 &&
+        self.editedItem.voucher_number.length > 0 &&
+        self.editedItem.tax >= 0 &&
+        self.editedItem.person.length > 0 &&
+        self.editedItem.details.length > 0
+      ) {
+        return false;
+      } else {
+        return true;
+      }
     },
     total: function() {
       let obj_entry = this.editedItem.details.map(item => item.sub_total);
@@ -710,7 +728,7 @@ export default {
           .then(() => {
             self.showSnackbar({
               show: true,
-              text: "Disabled Entry",
+              text: "Cancelled Entry",
               color: "red darken-3"
             });
             self.list();
@@ -728,7 +746,7 @@ export default {
           .then(() => {
             self.showSnackbar({
               show: true,
-              text: "Enable Entry",
+              text: "Approved Entry",
               color: "indigo darken-3"
             });
             self.list();
