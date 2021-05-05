@@ -348,7 +348,6 @@ export default {
         .get("/article/list", config)
         .then(res => {
           this.articles = res.data;
-          console.log(res.data);
         })
         .catch(() => {
           self.showSnackbar({
