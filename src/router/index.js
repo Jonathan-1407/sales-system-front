@@ -42,6 +42,15 @@ const routes = [
     }
   },
   {
+    path: "/entries",
+    name: "Entry",
+    component: () => import("../views/Purchases/Entry.vue"),
+    meta: {
+      administrator: true,
+      grocer: true
+    }
+  },
+  {
     path: "/vendors",
     name: "Vendor",
     component: () => import("../views/Purchases/Vendor.vue"),
