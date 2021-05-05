@@ -31,6 +31,9 @@
     >
       <template v-slot:top>
         <v-toolbar flat>
+          <v-btn class="mx-4" @click="generatePDF()" :loading="is_loading_pdf">
+            <v-icon>mdi-printer</v-icon>
+          </v-btn>
           <v-toolbar-title>Articles</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
@@ -201,6 +204,10 @@
 <script>
 import { mapState } from "vuex";
 import axios from "axios";
+import jsPDF from "jspdf";
+
+// eslint-disable-next-line no-unused-vars
+import { autoTable } from "jspdf-autotable";
 
 export default {
   name: "Article",
@@ -208,6 +215,7 @@ export default {
     search: "",
     dialog: false,
     dialogState: false,
+    is_loading_pdf: false,
     snackbar: {
       show: false,
       text: "",
@@ -350,7 +358,7 @@ export default {
           this.articles = res.data;
         })
         .catch(() => {
-          self.showSnackbar({
+          this.showSnackbar({
             show: true,
             text: "Server Error",
             color: "red darken-3"
@@ -504,6 +512,40 @@ export default {
           });
       }
       this.close();
+    },
+    generatePDF: function() {
+      let self = this;
+      self.is_loading_pdf = true;
+      let date = new Date().getTime();
+      let columns = [
+        { title: "Code", dataKey: "code" },
+        { title: "Name", dataKey: "name" },
+        { title: "Category", dataKey: "category" },
+        { title: "Stock", dataKey: "stock" },
+        { title: "Sale price", dataKey: "sale_price" }
+      ];
+
+      let rows = [];
+
+      self.articles.map(function(item) {
+        rows.push({
+          code: item.code,
+          name: item.name,
+          category: item.category.name,
+          stock: item.stock,
+          sale_price: item.sale_price
+        });
+      });
+
+      let doc = new jsPDF("p", "pt");
+      doc.autoTable(columns, rows, {
+        margin: { top: 60 },
+        didDrawPage: function() {
+          doc.text("List of articles", 40, 30);
+        }
+      });
+      doc.save(`consult-article-${date}.pdf`);
+      self.is_loading_pdf = false;
     }
   }
 };
