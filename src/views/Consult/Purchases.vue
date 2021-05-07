@@ -128,40 +128,10 @@
                         :headers="detailsHeaders"
                         :items="editedItem.details"
                       >
-                        <template v-slot:item.amount="{ item }">
-                          <v-text-field
-                            v-model.number="item.amount"
-                            placeholder="Amount"
-                            readonly
-                          ></v-text-field>
-                        </template>
-                        <template v-slot:item.price="{ item }">
-                          <v-text-field
-                            v-model.number="item.price"
-                            placeholder="Amount"
-                            readonly
-                          ></v-text-field>
-                        </template>
                         <template v-slot:item.sub_total="{ item }">
                           <span>
                             ${{ (item.sub_total = item.price * item.amount) }}
                           </span>
-                        </template>
-                        <template v-slot:item.actions="{ item }">
-                          <v-tooltip bottom>
-                            <template v-slot:activator="{ on, attrs }">
-                              <v-icon
-                                small
-                                @click="removeArticle(item)"
-                                v-bind="attrs"
-                                v-on="on"
-                                disabled
-                              >
-                                mdi-delete
-                              </v-icon>
-                            </template>
-                            <span>Remove</span>
-                          </v-tooltip>
                         </template>
                       </v-data-table>
                     </v-col>
@@ -317,13 +287,6 @@ export default {
       }
     ],
     detailsHeaders: [
-      {
-        text: "Actions",
-        value: "actions",
-        sortable: false,
-        align: "center",
-        width: "15%"
-      },
       {
         text: "Article",
         align: "left",
