@@ -86,9 +86,19 @@ const routes = [
     }
   },
   {
-    path: "/purchases",
+    path: "/consult-purchases",
     name: "Purchases",
     component: () => import("../views/Consult/Purchases.vue"),
+    meta: {
+      administrator: true,
+      grocer: true,
+      seller: true
+    }
+  },
+  {
+    path: "/consult-sales",
+    name: "Sales",
+    component: () => import("../views/Consult/Sales.vue"),
     meta: {
       administrator: true,
       grocer: true,
@@ -119,7 +129,7 @@ router.beforeEach((to, from, next) => {
       next();
     }
   } else {
-    next({name: "Login"});
+    next({ name: "Login" });
   }
 });
 

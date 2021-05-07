@@ -203,7 +203,7 @@
                         <template v-slot:item.price="{ item }">
                           <v-text-field
                             v-model.number="item.price"
-                            placeholder="Amount"
+                            placeholder="Price"
                             :readonly="dialogView"
                           ></v-text-field>
                         </template>

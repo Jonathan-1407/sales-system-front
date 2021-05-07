@@ -645,7 +645,7 @@ export default {
       };
 
       axios
-        .get("/person/list?type=Client", config)
+        .get("/person/list?type=Vendor", config)
         .then(res => {
           this.vendors = res.data;
         })

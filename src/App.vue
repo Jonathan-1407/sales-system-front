@@ -191,9 +191,9 @@ export default {
           {
             icon: "mdi-arrow-left-thick",
             text: "Purchases",
-            path: "/purchases"
+            path: "/consult-purchases"
           },
-          { icon: "mdi-arrow-right-thick", text: "Sales", path: "/sales" }
+          { icon: "mdi-arrow-right-thick", text: "Sales", path: "/consult-sales" }
         ],
         access: {
           administrator: true,
