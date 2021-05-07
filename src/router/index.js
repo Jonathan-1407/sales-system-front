@@ -84,6 +84,16 @@ const routes = [
     meta: {
       administrator: true
     }
+  },
+  {
+    path: "/purchases",
+    name: "Purchases",
+    component: () => import("../views/Consult/Purchases.vue"),
+    meta: {
+      administrator: true,
+      grocer: true,
+      seller: true
+    }
   }
 ];
 

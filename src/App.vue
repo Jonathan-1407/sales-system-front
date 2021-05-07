@@ -197,7 +197,7 @@ export default {
         ],
         access: {
           administrator: true,
-          grocer: false,
+          grocer: true,
           seller: true
         }
       }
