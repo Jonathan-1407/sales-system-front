@@ -193,7 +193,11 @@ export default {
             text: "Purchases",
             path: "/consult-purchases"
           },
-          { icon: "mdi-arrow-right-thick", text: "Sales", path: "/consult-sales" }
+          {
+            icon: "mdi-arrow-right-thick",
+            text: "Sales",
+            path: "/consult-sales"
+          }
         ],
         access: {
           administrator: true,
@@ -223,9 +227,18 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["autoLogin", "logout"])
+    ...mapActions(["autoLogin", "logout"]),
+    accept: async function() {
+      this.showUpgradeUI = false;
+      await this.$workbox.messageSW({ type: "SKIP_WAITING" });
+    }
   },
   created: function() {
+    if (this.$workbox) {
+      this.$workbox.addEventListener("waiting", () => {
+        this.showUpgradeUI = true;
+      });
+    }
     this.autoLogin();
   }
 };

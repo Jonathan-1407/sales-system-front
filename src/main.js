@@ -1,11 +1,13 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
-import vuetify from './plugins/vuetify'
+import Vue from "vue";
+import App from "./App.vue";
+import router from "./router";
+import store from "./store";
+import vuetify from "./plugins/vuetify";
 import axios from "axios";
+import wb from "./registerServiceWorker";
 
-Vue.config.productionTip = false
+Vue.prototype.$workbox = wb;
+Vue.config.productionTip = false;
 axios.defaults.baseURL = "http://localhost:3000/api";
 
 new Vue({
@@ -13,4 +15,4 @@ new Vue({
   store,
   vuetify,
   render: h => h(App)
-}).$mount('#app')
+}).$mount("#app");
